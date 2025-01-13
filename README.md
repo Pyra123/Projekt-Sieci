@@ -1,22 +1,33 @@
+`socket`: umożliwia praze z gniazdami sieciowymi (UDP)    
+`threading`: umożliwia odbieranie pakietów UDP    
+`re`: używana w funkcji sprawdzającej poprawność adresu IP    
+
+```
 import tkinter as tk
 import socket
 import threading
 import re
+```
 
+`BROADCAST_IP`: Adres IP, na którym nasłuchuje gniazdo    
+`UDP_PORT`: Port używany do komunikacji UDP    
+`global_sock`: globalne gniazdo UDP, potrzebne do odbioru wiadomości    
 
+```
 BROADCAST_IP = "0.0.0.0"
 UDP_PORT = 5005
 global_sock = None
-
+```
+Tworzymy globalne gniazdo UDP i ustawiamy jego nasłuch na konkretnym porcie
+```
 def create_global_socket():
     global global_sock
     global_sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
     global_sock.bind((BROADCAST_IP, UDP_PORT))
-
+```
+Sprawdzamy poprawność adresu IP
+```
 def is_valid_ip(ip):
-    """
-    Funkcja sprawdzająca poprawność adresu IP.
-    """
     octets = ip.split('.')
     if len(octets) != 4:
         return False
@@ -24,7 +35,9 @@ def is_valid_ip(ip):
         if not octet.isdigit() or int(octet) < 0 or int(octet) > 255:
             return False
     return True
-
+```
+Tworzymy lokalne gniazdo UDP na któro wysyłamy wiadomość `message` do podanego adresu IP robota `robot_udp_ip`
+```
 def on_button_click(message, robot_udp_ip):
     print("Przycisk został kliknięty!")
     # Tworzenie gniazda UDP
@@ -33,7 +46,11 @@ def on_button_click(message, robot_udp_ip):
     sock.sendto(message.encode(), (robot_udp_ip, UDP_PORT))  # Konwertowanie stringa na bajty i wysłanie
     # Zamykanie gniazda
     sock.close()
-
+```
+### Odbieranie pakietów UDP
+* Nasłuchwianie na globalnym gnieździe pakiety UDP
+* Przetwarzanie wiadomości zgodnie z specyfikacjami
+```
 def receive_udp_packets(robot_udp_ip, position_text, kp_text, text_box, alias):
     global global_sock
 
@@ -64,9 +81,10 @@ def receive_udp_packets(robot_udp_ip, position_text, kp_text, text_box, alias):
                     text_box.config(state=tk.DISABLED)
         except:
             break
-
+```
+Pobieranie parametrów robota z GUI oraz tworzenie lokalnego gniazda UDP i wysyłanie parametrów sterownika np. (`Kp`,`Ki`,`Kd`)
+```
 def send_parameters(robot_udp_ip, Kp, Ki, Kd, Max_speed, Base_speed, Turn_speed, Threshold):
-    # Tworzenie gniazda UDP
     sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
     try:
         # Pobieranie wartości z pól Entry
@@ -104,7 +122,8 @@ def send_parameters(robot_udp_ip, Kp, Ki, Kd, Max_speed, Base_speed, Turn_speed,
     finally:
         # Zamykanie gniazda
         sock.close()
-
+```
+------------------
 def start_application(robot_udp_ip, alias=None):
     global text_box, position_text, kp_text
 
