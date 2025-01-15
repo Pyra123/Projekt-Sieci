@@ -123,7 +123,8 @@ def send_parameters(robot_udp_ip, Kp, Ki, Kd, Max_speed, Base_speed, Turn_speed,
         # Zamykanie gniazda
         sock.close()
 ```
-------------------
+Tworzymy okno kontroli programu
+```
 def start_application(robot_udp_ip, alias=None):
     global text_box, position_text, kp_text
 
@@ -223,7 +224,9 @@ def start_application(robot_udp_ip, alias=None):
 
     # Rozpoczęcie głównej pętli programu
     root.mainloop()
-
+```
+Tworzymy okienko do wprowadzenia adresu IP oraz alias robota
+```
 # Tworzenie okna do wprowadzania adresu IP
 def open_ip_window():
     ip_window = tk.Tk()
@@ -256,7 +259,12 @@ def open_ip_window():
 
     # Uruchomienie głównej pętli programu dla okna do wprowadzania adresu IP
     ip_window.mainloop()
-
+```
+Odpalenie programu
+* Tworzymy globalne gniazdo UDP
+* Otwieramy okno do wprowadzenia adresu IP
+```
 # Create the global socket once
 create_global_socket()
 open_ip_window()
+```
