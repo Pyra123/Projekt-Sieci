@@ -1,0 +1,81 @@
+#include <QTRSensors.h>
+#include <WiFi.h>
+#include <AsyncUDP.h>
+#include <Adafruit_NeoPixel.h>
+
+float MaxSpeed = 80; 
+float InnerWheelSpeed = 50; // Prędkość koła wewnętrznego
+float OuterWheelSpeed = 70; // Prędkość koła zewnętrznego
+#define LEFT_MOTOR_FORWARD 11
+#define LEFT_MOTOR_BACKWARD 12
+#define RIGHT_MOTOR_FORWARD 13
+#define RIGHT_MOTOR_BACKWARD 14
+#define NEOPIXEL_PIN 48
+#define NUM_PIXELS 1
+
+const char* ssid = "LF";
+const char* password = "Karolina2137";
+
+AsyncUDP udp;
+Adafruit_NeoPixel pixels(NUM_PIXELS, NEOPIXEL_PIN, NEO_GRB + NEO_KHZ800);
+
+int ready = 0;
+
+void setup()
+{
+  pixels.begin();
+
+  // Set motor PWM pins as OUTPUT
+  pinMode(LEFT_MOTOR_FORWARD, OUTPUT);
+  pinMode(LEFT_MOTOR_BACKWARD, OUTPUT);
+  pinMode(RIGHT_MOTOR_FORWARD, OUTPUT);
+  pinMode(RIGHT_MOTOR_BACKWARD, OUTPUT);
+  analogReadResolution(12);
+
+  // For debugging only
+  Serial.begin(9600);
+
+  // Set up WiFi as an access point
+  WiFi.softAP(ssid, password);
+
+  // Open UDP socket on port 1234
+  if (udp.listen(1234)) {
+    Serial.print("UDP Listening on IP: ");
+    Serial.println(WiFi.localIP());
+  }
+
+  // Handle incoming UDP packets
+  udp.onPacket([](AsyncUDPPacket packet) {
+    char* tmpStr = (char*)malloc(packet.length() + 1);
+    memcpy(tmpStr, packet.data(), packet.length());
+    tmpStr[packet.length()] = '\0';
+    String message = String(tmpStr);
+    free(tmpStr);
+    Serial.println(message);
+
+    if (message == "Start") {
+      ready = 1;
+    }
+    if (message == "Stop") {
+      ready = 0;
+    }
+  });
+}
+
+void loop()
+{
+  if (ready == 1) {
+    // Move in a circular path by setting different speeds for the wheels
+    analogWrite(LEFT_MOTOR_FORWARD, InnerWheelSpeed); // Mniejsze koło
+    analogWrite(RIGHT_MOTOR_FORWARD, OuterWheelSpeed); // Większe koło
+
+    analogWrite(LEFT_MOTOR_BACKWARD, 0);
+    analogWrite(RIGHT_MOTOR_BACKWARD, 0);
+  } else {
+    // Stop the motors
+    analogWrite(LEFT_MOTOR_FORWARD, 0);
+    analogWrite(RIGHT_MOTOR_FORWARD, 0);
+    analogWrite(LEFT_MOTOR_BACKWARD, 0);
+    analogWrite(RIGHT_MOTOR_BACKWARD, 0);
+  }
+}
