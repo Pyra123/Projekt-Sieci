@@ -1,0 +1,169 @@
+import pygame
+import random
+import math
+import time
+
+# Ustawienia okna
+WIDTH, HEIGHT = 600, 600
+FPS = 60
+RADIUS = 250  # Promień okręgu
+
+# Inicjalizacja pygame
+pygame.init()
+screen = pygame.display.set_mode((WIDTH, HEIGHT))
+pygame.display.set_caption("Symulacja programu")
+clock = pygame.time.Clock()
+
+# Kolory
+WHITE = (255, 255, 255)
+BLACK = (0, 0, 0)
+RED = (255, 0, 0)
+BLUE = (0, 0, 255)
+GREEN = (0, 255, 0)
+ORIGINAL_COLOR_1 = BLUE
+ORIGINAL_COLOR_2 = GREEN
+
+# Pozycja środka okręgu
+CENTER = (WIDTH // 2, HEIGHT // 2)
+
+font = pygame.font.SysFont(None, 24)
+
+def random_position_within_circle(min_distance):
+    while True:
+        angle = random.uniform(0, 2 * math.pi)
+        radius = random.uniform(0, RADIUS - 20)  # -20 dla rozmiaru kwadratu
+        x = CENTER[0] + radius * math.cos(angle)
+        y = CENTER[1] + radius * math.sin(angle)
+        return x, y
+
+class Square:
+    def __init__(self, x, y, size, color):
+        self.x = x
+        self.y = y
+        self.size = size
+        self.color = color
+        angle = random.uniform(0, 2 * math.pi)
+        speed = random.choice([2, 3])
+        self.vx = speed * math.cos(angle)
+        self.vy = speed * math.sin(angle)
+        self.stopped = False
+        self.stop_timer = 0
+        self.arrow_angle = math.atan2(self.vy, self.vx)
+
+    def move(self):
+        if not self.stopped:
+            # Aktualizacja pozycji
+            self.x += self.vx
+            self.y += self.vy
+
+            # Sprawdzenie kolizji z okręgiem
+            dx = self.x - CENTER[0]
+            dy = self.y - CENTER[1]
+            distance = math.sqrt(dx**2 + dy**2)
+
+            if distance + self.size / 2 > RADIUS:
+                # Odbicie w przypadku kolizji
+                angle = math.atan2(dy, dx)
+                normal_vx = math.cos(angle)
+                normal_vy = math.sin(angle)
+
+                dot_product = self.vx * normal_vx + self.vy * normal_vy
+                self.vx -= 2 * dot_product * normal_vx
+                self.vy -= 2 * dot_product * normal_vy
+
+                self.stopped = True  # Zatrzymanie na chwilę przy zmianie kierunku
+                self.stop_timer = time.time()
+
+                # Obliczenie nowego kąta strzałki
+                self.arrow_angle = math.atan2(self.vy, self.vx)
+
+    def bounce(self, normal_vx, normal_vy):
+        # Odbicie od innego kwadratu lub powierzchni
+        dot_product = self.vx * normal_vx + self.vy * normal_vy
+        self.vx -= 2 * dot_product * normal_vx
+        self.vy -= 2 * dot_product * normal_vy
+        self.arrow_angle = math.atan2(self.vy, self.vx)
+
+    def stop_temporarily(self):
+        self.stopped = True
+        self.stop_timer = time.time()
+
+    def resume(self):
+        self.stopped = False
+
+    def draw(self):
+        pygame.draw.rect(screen, self.color, (self.x - self.size // 2, self.y - self.size // 2, self.size, self.size))
+
+        # Rysowanie strzałki
+        arrow_length = 15
+        end_x = self.x + arrow_length * math.cos(self.arrow_angle)
+        end_y = self.y + arrow_length * math.sin(self.arrow_angle)
+        pygame.draw.line(screen, BLACK, (self.x, self.y), (end_x, end_y), 2)
+
+# Inicjalizacja kwadratów
+while True:
+    x1, y1 = random_position_within_circle(0)
+    x2, y2 = random_position_within_circle(0)
+    distance = math.sqrt((x1 - x2)**2 + (y1 - y2)**2)
+    if distance >= 100:  # Sprawdzenie minimalnej odległości między kwadratami
+        break
+
+square1 = Square(x1, y1, 20, ORIGINAL_COLOR_1)
+square2 = Square(x2, y2, 20, ORIGINAL_COLOR_2)
+
+# Główna pętla programu
+running = True
+while running:
+    screen.fill(WHITE)
+
+    # Rysowanie okręgu
+    pygame.draw.circle(screen, BLACK, CENTER, RADIUS, 8)
+
+    for event in pygame.event.get():
+        if event.type == pygame.QUIT:
+            running = False
+
+    # Sprawdzenie odległości między kwadratami za pomocą lokalizacji
+    dx = square1.x - square2.x
+    dy = square1.y - square2.y
+    distance_between_squares = math.sqrt(dx**2 + dy**2)
+
+    if distance_between_squares < 50 and not square1.stopped and not square2.stopped:
+        # Zatrzymanie i zmiana koloru
+        square1.stop_temporarily()
+        square2.stop_temporarily()
+        square1.color = RED
+        square2.color = RED
+
+        # Odbicie przy zetknięciu
+        normal_vx = dx / distance_between_squares
+        normal_vy = dy / distance_between_squares
+
+        square1.bounce(-normal_vx, -normal_vy)
+        square2.bounce(normal_vx, normal_vy)
+
+    # Sprawdzenie, czy należy wznowić ruch
+    current_time = time.time()
+    if square1.stopped and current_time - square1.stop_timer >= 2:
+        square1.resume()
+        square1.color = ORIGINAL_COLOR_1
+    if square2.stopped and current_time - square2.stop_timer >= 2:
+        square2.resume()
+        square2.color = ORIGINAL_COLOR_2
+
+    # Ruch i rysowanie kwadratów
+    square1.move()
+    square2.move()
+    square1.draw()
+    square2.draw()
+
+    # Wyświetlanie lokalizacji kwadratów w rogu ekranu
+    position_text_1 = font.render(f"Square 1: ({square1.x:.0f}, {square1.y:.0f})", True, BLACK)
+    position_text_2 = font.render(f"Square 2: ({square2.x:.0f}, {square2.y:.0f})", True, BLACK)
+    screen.blit(position_text_1, (10, 10))
+    screen.blit(position_text_2, (10, 30))
+
+    pygame.display.flip()
+    clock.tick(FPS)
+
+pygame.quit()
