@@ -1,3 +1,22 @@
+# Program komunikacji między robotami
+## Założenie
+Program ma na celu połączyć się z robotami i odbierać od nich aktualne położenie w celu uniknięcia kolizji między nimi
+
+# Działąnie
+Program tworzy globalne gniazdo UDP w celu odbierania wiadomości (w naszym przypadku lokalizacji)
+Gniazdo łączy się z adresem IP i portem 5005
+Sami możemy wysłać zapytanie do robota za pomocą wiadomości ASCII przez UDP do odpowiedniego robota
+
+
+
+
+
+
+
+
+
+
+# Program
 `socket`: umożliwia praze z gniazdami sieciowymi (UDP)    
 `threading`: umożliwia odbieranie pakietów UDP    
 `re`: używana w funkcji sprawdzającej poprawność adresu IP    
