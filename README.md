@@ -1,8 +1,13 @@
 # Program komunikacji między robotami
 ## Założenie
 Program ma na celu połączyć się z robotami i odbierać od nich aktualne położenie w celu uniknięcia kolizji między nimi
+## Informacje
+Program składa się z 2 elementów
+- Program do robota    
+Program który wgrywamy do robota został przerobiony żeby nie jeździł po lini tylko losowo w okręgu zmieniając kierunek przy kontakcie z okręgiem lub zbliżeniem się do innego robota    
+https://github.com/Kneicik/Line_followerV0
 
-# Działąnie
+## Działąnie
 Program tworzy globalne gniazdo UDP w celu odbierania wiadomości (w naszym przypadku lokalizacji)
 Gniazdo łączy się z adresem IP i portem 5005
 Sami możemy wysłać zapytanie do robota za pomocą wiadomości ASCII przez UDP do odpowiedniego robota
