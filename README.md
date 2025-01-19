@@ -51,7 +51,7 @@ def on_button_click(message, robot_udp_ip):
 * Nasłuchwianie na globalnym gnieździe pakiety UDP
 * Przetwarzanie wiadomości zgodnie z specyfikacjami
 ```
-def receive_udp_packets(robot_udp_ip, position_text, kp_text, text_box, alias):
+def receive_udp_packets(robot_udp_ip, position_text, x_text, text_box, alias):
     global global_sock
 
     while True:
@@ -69,11 +69,11 @@ def receive_udp_packets(robot_udp_ip, position_text, kp_text, text_box, alias):
                     position_text.delete(1.0, tk.END)
                     position_text.insert(tk.END, stripped_data + "\n")
                     position_text.config(state=tk.DISABLED)
-                elif "Kp" in stripped_data:  # Sprawdzanie, czy pakiet zawiera słowo "Kp"
+                elif "x" in stripped_data:  # Sprawdzanie, czy pakiet zawiera słowo "x"
                     kp_text.config(state=tk.NORMAL)
-                    kp_text.delete(1.0, tk.END)
-                    kp_text.insert(tk.END, stripped_data + "\n")
-                    kp_text.config(state=tk.DISABLED)
+                    x_text.delete(1.0, tk.END)
+                    x_text.insert(tk.END, stripped_data + "\n")
+                    x_text.config(state=tk.DISABLED)
                 else:
                     text_box.config(state=tk.NORMAL)
                     text_box.delete(1.0, tk.END)
@@ -82,28 +82,28 @@ def receive_udp_packets(robot_udp_ip, position_text, kp_text, text_box, alias):
         except:
             break
 ```
-Pobieranie parametrów robota z GUI oraz tworzenie lokalnego gniazda UDP i wysyłanie parametrów sterownika np. (`Kp`,`Ki`,`Kd`)
+Pobieranie parametrów robota z GUI oraz tworzenie lokalnego gniazda UDP i wysyłanie parametrów sterownika np. (`x`,`y`,`z`)
 ```
-def send_parameters(robot_udp_ip, Kp, Ki, Kd, Max_speed, Base_speed, Turn_speed, Threshold):
+def send_parameters(robot_udp_ip, X, Y, Z, Max_speed, Base_speed, Turn_speed, Threshold):
     sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
     try:
         # Pobieranie wartości z pól Entry
-        kp_value = float(Kp.get())
-        ki_value = float(Ki.get())
-        kd_value = float(Kd.get())
+        x_value = float(X.get())
+        y_value = float(Y.get())
+        z_value = float(Z.get())
         max_speed_value = float(Max_speed.get())
         base_speed_value = float(Base_speed.get())
         turn_speed_value = float(Turn_speed.get())
         threshold_value = float(Threshold.get())
 
-        # Wysyłanie parametrów Kp
-        message = f"Kp: {kp_value:.2f}"
+        # Wysyłanie parametrów X
+        message = f"x: {x_value:.2f}"
         sock.sendto(message.encode(), (robot_udp_ip, UDP_PORT))
-        # Wysyłanie parametrów Ki
-        message = f"Ki: {ki_value:.2f}"
+        # Wysyłanie parametrów Y
+        message = f"y: {y_value:.2f}"
         sock.sendto(message.encode(), (robot_udp_ip, UDP_PORT))
-        # Wysyłanie parametrów Kd
-        message = f"Kd: {kd_value:.2f}"
+        # Wysyłanie parametrów Z
+        message = f"z: {z_value:.2f}"
         sock.sendto(message.encode(), (robot_udp_ip, UDP_PORT))
         # Wysyłanie parametrów Max_speed
         message = f"Ma: {max_speed_value:.2f}"
@@ -126,7 +126,7 @@ def send_parameters(robot_udp_ip, Kp, Ki, Kd, Max_speed, Base_speed, Turn_speed,
 Tworzymy okno kontroli programu
 ```
 def start_application(robot_udp_ip, alias=None):
-    global text_box, position_text, kp_text
+    global text_box, position_text, x_text
 
     # Tworzenie okna głównego
     root = tk.Tk()
@@ -152,23 +152,23 @@ def start_application(robot_udp_ip, alias=None):
     reset_button = tk.Button(frame, text="Reset Robot", command=lambda: on_button_click("Reset", robot_udp_ip))
     reset_button.grid(row=1, column=2)
 
-    Kp_frame = tk.Frame(frame)
-    Kp_frame.grid(row=2, column=0)
-    tk.Label(Kp_frame, text="Kp:").grid(row=0, column=0)
-    Kp = tk.Entry(Kp_frame)
-    Kp.grid(row=0, column=1)
+    X_frame = tk.Frame(frame)
+    X_frame.grid(row=2, column=0)
+    tk.Label(X_frame, text="X:").grid(row=0, column=0)
+    X = tk.Entry(X_frame)
+    X.grid(row=0, column=1)
 
-    Ki_frame = tk.Frame(frame)
-    Ki_frame.grid(row=2, column=1)
-    tk.Label(Ki_frame, text="Ki:").grid(row=0, column=0)
-    Ki = tk.Entry(Ki_frame)
-    Ki.grid(row=0, column=1)
+    Y_frame = tk.Frame(frame)
+    Y_frame.grid(row=2, column=1)
+    tk.Label(Y_frame, text="Y:").grid(row=0, column=0)
+    Y = tk.Entry(Y_frame)
+    Y.grid(row=0, column=1)
 
-    Kd_frame = tk.Frame(frame)
-    Kd_frame.grid(row=2, column=2)
-    tk.Label(Kd_frame, text="Kd:").grid(row=0, column=0)
-    Kd = tk.Entry(Kd_frame)
-    Kd.grid(row=0, column=1)
+    Z_frame = tk.Frame(frame)
+    Z_frame.grid(row=2, column=2)
+    tk.Label(Z_frame, text="Z:").grid(row=0, column=0)
+    Z = tk.Entry(Z_frame)
+    Z.grid(row=0, column=1)
 
     Max_speed_frame = tk.Frame(frame)
     Max_speed_frame.grid(row=3, column=0)
@@ -195,7 +195,7 @@ def start_application(robot_udp_ip, alias=None):
     Threshold.grid(row=0, column=1)
 
     send_params_button = tk.Button(frame, text="Send parameters", command=lambda: send_parameters(
-        robot_udp_ip, Kp, Ki, Kd, Max_speed, Base_speed, Turn_speed, Threshold))
+        robot_udp_ip, X, Y, Z, Max_speed, Base_speed, Turn_speed, Threshold))
     send_params_button.grid(row=6, column=0)
 
     request_params_button = tk.Button(frame, text="Request parameters",
@@ -212,13 +212,13 @@ def start_application(robot_udp_ip, alias=None):
     position_text.pack(padx=5, pady=5)
     position_text.config(state=tk.DISABLED)
 
-    # Pole tekstowe dla Kp
-    kp_text = tk.Text(root, height=2, width=50)
-    kp_text.pack(padx=5, pady=5)
-    kp_text.config(state=tk.DISABLED)
+    # Pole tekstowe dla X
+    x_text = tk.Text(root, height=2, width=50)
+    x_text.pack(padx=5, pady=5)
+    x_text.config(state=tk.DISABLED)
 
     # Uruchomienie funkcji odbierającej pakiety UDP w osobnym wątku
-    thread = threading.Thread(target=receive_udp_packets, args=(robot_udp_ip, position_text, kp_text, text_box, alias))
+    thread = threading.Thread(target=receive_udp_packets, args=(robot_udp_ip, position_text, x_text, text_box, alias))
     thread.daemon = True  # Ustawienie wątku jako wątek demoniczny
     thread.start()
 
