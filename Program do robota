@@ -14,7 +14,7 @@ float OuterWheelSpeed = 70; // Prędkość koła zewnętrznego
 #define NUM_PIXELS 1
 
 const char* ssid = "LF";
-const char* password = "Karolina2137";
+const char* password = "Pyra123";
 
 AsyncUDP udp;
 Adafruit_NeoPixel pixels(NUM_PIXELS, NEOPIXEL_PIN, NEO_GRB + NEO_KHZ800);
