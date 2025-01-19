@@ -7,21 +7,28 @@ Program składa się z 2 elementów
 Program został przerobiony żeby nie jeździł po lini tylko losowo w okręgu zmieniając kierunek przy kontakcie z okręgiem lub zbliżeniem się do innego robota    
 https://github.com/Kneicik/Line_followerV0
 - Program:    
-Program który odpalamy na komputerze 2 krotnie służy do łączenia się z robotem oraz odbierania i wysyłania potrzebnych informacji
+Program który odpalamy na komputerze, współpracuje z powyższym programem trzeba tylko zmienić port na 5005, służy do łączenia się z robotem oraz odbierania i wysyłania potrzebnych informacji
 ## Działąnie
-Program tworzy globalne gniazdo UDP w celu odbierania wiadomości (w naszym przypadku lokalizacji)    
+Program tworzy globalne gniazdo UDP któro wykorzystamy do odbierania wiadomości (w naszym przypadku lokalizacji)    
 Gniazdo łączy się z adresem IP i portem 5005    
+Odbieramy danie z robota oraz wysyłamy swoje
 
+## Problem
 ${\textsf{\color{red}WAŻNE}}$
-jest to tylko koncepcja programu, żeby go wytestować potrzebne jest zrobić robota oraz dodać do niego
+jest to tylko koncepcja programu, żeby go wytestować potrzebne jest zrobić robota.    
+W celu zademonstrowania jak POWINIEN działać program stworzyłem plik Symulacja projektu,
 
+### Krótki opis
+wykorzystałem biblioteke `pygame` która normalnie służy to tworzenia gier 2D żeby zwizualizować działanie programu,    
+Program wyświetla obiekty mające pokazać zachowanie się robotów:
+- kolorowe kwadraty (roboty)
+- strzałki (kierunek ruchu)
+Wyświetla też:
+- okrąg
+- lokalizacje bieżącą robotów
+- graficzną prezentacje wykrycia przez siebie robotów
 
-
-
-
-
-
-# Program
+##  Omówienie poszczególnych fragmentów Programu
 `socket`: umożliwia praze z gniazdami sieciowymi (UDP)    
 `threading`: umożliwia odbieranie pakietów UDP    
 `re`: używana w funkcji sprawdzającej poprawność adresu IP    
